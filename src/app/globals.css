@@ -1,0 +1,163 @@
+@import "tailwindcss";
+
+@theme {
+  --color-paper: #f6f7f4;
+  --color-surface: #ffffff;
+  --color-ink: #18201c;
+  --color-muted: #6b756f;
+  --color-line: #e1e5e0;
+  --color-line-strong: #c9cfc8;
+  --color-slate: #2d4339;
+  --color-slate-hover: #23362d;
+  --color-slate-soft: #e7ede9;
+  --color-chalk: #f3e7b8;
+  --color-chalk-ink: #5f4a0c;
+  --color-danger: #b4442e;
+  --color-danger-soft: #f9ebe7;
+
+  /* Public menu only: café-table backdrop and the paper the menu is printed on */
+  --color-latte: #ece2d2;
+  --color-roast: #5b3d28;
+  --color-menu-paper: #f8f2e7;
+}
+
+@theme inline {
+  --font-display: var(--font-young-serif), Georgia, serif;
+  --font-sans: var(--font-figtree), system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+}
+
+/* In the base layer so component utilities (e.g. focus:outline-none on inputs) can override it */
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-slate);
+    outline-offset: 2px;
+  }
+}
+
+/* Dotted line between a dish name and its price — the classic menu leader */
+.leader {
+  flex: 1 1 auto;
+  min-width: 1.5rem;
+  margin-inline: 0.5rem;
+  border-bottom: 2px dotted var(--color-line-strong);
+  transform: translateY(-0.3em);
+}
+
+/*
+ * Public menu page. Re-pointing --color-paper makes everything inside that uses it (sticky
+ * section bar, the background behind dish names on wrapping leaders) match the menu paper.
+ */
+.menu-surface {
+  --color-paper: var(--color-menu-paper);
+  background-color: var(--color-menu-paper);
+}
+
+/* Scalloped bottom edge of the menu's signboard, like a café awning. */
+.awning-edge {
+  background-image: radial-gradient(circle at 50% 0, var(--color-slate) 11.5px, transparent 12px);
+  background-size: 24px 12px;
+  background-repeat: repeat-x;
+  background-position: center top;
+}
+
+/* Fine paper grain: tiny noise, multiplied so it tints paper and ink alike. */
+.paper-grain {
+  opacity: 0.35;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.36 0 0 0 0 0.24 0 0 0 0 0.16 0 0 0 0.09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/*
+ * Leader for names that may wrap (narrow price columns): the dots are a background on the
+ * bottom line, and the name's own background hides them behind the text, so the dots always
+ * run from the end of the last line to the prices.
+ */
+.leader-fill {
+  background-image: radial-gradient(circle, var(--color-line-strong) 1px, transparent 1.4px);
+  background-size: 6px 4px;
+  background-repeat: repeat-x;
+  background-position: left bottom 0.4em;
+}
+.leader-fill > .leader-text {
+  background: var(--color-paper);
+  padding-right: 0.5rem;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+/*
+ * "You are here": when a diner taps a section tab, its heading gets a highlighter swipe that
+ * fades out. box-shadow widens the mark without shifting the layout.
+ */
+@keyframes section-arrive {
+  0%,
+  35% {
+    background-color: var(--color-chalk);
+    box-shadow: 0 0 0 0.35rem var(--color-chalk);
+  }
+  100% {
+    background-color: transparent;
+    box-shadow: 0 0 0 0.35rem transparent;
+  }
+}
+.section-arrive {
+  border-radius: 0.25rem;
+  animation: section-arrive 1.6s ease-out;
+}
+
+/* Hero: an old price gets crossed out and rewritten */
+@keyframes strike {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@keyframes rewrite {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.strike-line {
+  transform-origin: left center;
+  animation: strike 450ms ease-out 900ms both;
+}
+.rewrite-in {
+  animation: rewrite 400ms ease-out 1350ms both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .strike-line,
+  .rewrite-in {
+    animation: none;
+  }
+  /* No fade: a short, still highlight instead. */
+  .section-arrive {
+    animation: none;
+    background-color: var(--color-chalk);
+    box-shadow: 0 0 0 0.35rem var(--color-chalk);
+  }
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-area,
+  .print-area * {
+    visibility: visible;
+  }
+  .print-area {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    box-shadow: none !important;
+  }
+}
